@@ -1,6 +1,7 @@
 'use strict';
 
 require('dotenv').config();
+
 const io = require('socket.io-client');
 const Chance = require('chance');
 const fake = new Chance();
@@ -26,20 +27,20 @@ socket.on('message', (msg) => {
   console.log(`Received message: ${msg}`);
 });
 
-// Simulate sending an event every 5 seconds
-setInterval(() => {
-  let order = {
-    orderID: fake.guid(),
-    status: 'ready',
-    store: vendorId,
-    customer: fake.name(),
-    address: fake.address(),
-    amount: fake.dollar()
-  };
-  console.log('VENDOR: New Order', order.orderID);
-  socket.emit('ready-for-pickup', order);
-}, 5000);
+makeFakeOrders();
 
-function generateOrderId() {
-  return 'ORDER-' + Math.floor(Math.random() * 100000);
+function makeFakeOrders() {
+  // setInterval runs over and over every xxxx milliseconds
+  setInterval(() => {
+    let order = {
+      orderID: fake.guid(),
+      status: 'ready',
+      store: vendorId,
+      customer: fake.name(),
+      address: fake.address(),
+      amount: fake.dollar()
+    };
+    console.log('VENDOR: New Order', order.orderID);
+    socket.emit('ready-for-pickup', order);
+  }, 1000);
 }
