@@ -7,7 +7,7 @@ const fake = new Chance();
 
 const { handlePickup, handleDelivery } = require('./handlers.js');
 
-const URL = process.env.HUB || 'http://localhost:3000';
+const URL = process.env.HUB;
 
 console.log('Connecting to:', URL);
 const socket = io.connect(URL);
@@ -15,6 +15,15 @@ const socket = io.connect(URL);
 // Subscribe to the right events and handle them with the right handlers
 socket.on('in-transit', handlePickup);
 socket.on('delivered', handleDelivery);
+
+socket.on('connect', () => {
+  console.log(`Vendor connected: ${socket.id}`);
+  socket.emit('join_room', { vendor_id: vendorId });
+});
+
+socket.on('message', (msg) => {
+  console.log(`Received message: ${msg}`);
+});
 
 makeFakeOrders();
 
@@ -24,7 +33,7 @@ function makeFakeOrders() {
     let order = {
       orderID: fake.guid(),
       status: 'ready',
-      store: fake.company(),
+      store: vendorId,
       customer: fake.name(),
       address: fake.address(),
       amount: fake.dollar()
@@ -33,5 +42,3 @@ function makeFakeOrders() {
     socket.emit('ready-for-pickup', order);
   }, 1000);
 }
-
-// Insert the code for the two stores here
